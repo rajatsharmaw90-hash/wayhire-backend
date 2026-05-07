@@ -12,11 +12,10 @@ const app = express();
 // MIDDLEWARE
 // =============================
 
-app.use(cors({
-     origin: "https://wayhire-frontend.vercel.app",
-  methods: ["GET", "POST", "OPTIONS"],
-  credentials: true
-}));
+app.use(cors(
+     { origin: "https://wayhire-frontend.vercel.app/",
+  credentials: true}
+));
 
 app.use(express.json());
 
