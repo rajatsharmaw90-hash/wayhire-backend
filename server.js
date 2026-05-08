@@ -54,17 +54,31 @@ app.get("/", (req, res) => {
 
 app.post("/contact", async (req, res) => {
   try {
-
     const { firstName, lastName, email, number, message } = req.body;
 
-    // Validation
+    console.log(req.body);
 
-    if (!firstName || !lastName || !email || !number || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: "Backend connected successfully",
+      data: {
+        firstName,
+        lastName,
+        email,
+        number,
+        message,
+      },
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+});
 
     // Send Email
 
