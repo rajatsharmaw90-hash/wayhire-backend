@@ -1,43 +1,28 @@
-// server.js
 import express from "express";
-import nodemailer from "nodemailer";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Resend } from "resend";
 
 dotenv.config();
 
 const app = express();
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 // =============================
 // MIDDLEWARE
 // =============================
 
-app.use(cors(
-    {
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  }
-));
+app.use(
+  cors({
+    origin: [
+      "https://mywayhire.com",
+      "https://www.mywayhire.com",
+    ],
+  })
+);
 
 app.use(express.json());
-
-
-// =============================
-// EMAIL TRANSPORTER
-// =============================
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 
 // =============================
 // TEST ROUTE
@@ -47,7 +32,6 @@ app.get("/", (req, res) => {
   res.send("Server is running...");
 });
 
-
 // =============================
 // CONTACT FORM ROUTE
 // =============================
@@ -56,40 +40,25 @@ app.post("/contact", async (req, res) => {
   try {
     const { firstName, lastName, email, number, message } = req.body;
 
-    console.log(req.body);
+    // Validation
 
-    res.status(200).json({
-      success: true,
-      message: "Backend connected successfully",
-      data: {
-        firstName,
-        lastName,
-        email,
-        number,
-        message,
-      },
-    });
+    if (!firstName || !lastName || !email || !number || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
 
-  } catch (error) {
-    console.log(error);
+    // SEND EMAIL USING RESEND
 
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-});
-
-    // Send Email
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
 
       to: process.env.EMAIL_USER,
 
-      replyTo: email,
-
       subject: `New Contact Form Inquiry from ${firstName}`,
+
+      replyTo: email,
 
       html: `
         <div style="font-family: Arial; padding: 20px;">
@@ -105,16 +74,17 @@ app.post("/contact", async (req, res) => {
           <p>
             <strong>First name:</strong> ${firstName}
           </p>
-           
+
           <p>
             <strong>Last name:</strong> ${lastName}
           </p>
+
           <p>
             <strong>Email:</strong> ${email}
           </p>
 
           <p>
-            <strong>Email:</strong> ${number}
+            <strong>Number:</strong> ${number}
           </p>
 
           <p>
@@ -129,7 +99,7 @@ app.post("/contact", async (req, res) => {
       `,
     });
 
-    // Success Response
+    // SUCCESS RESPONSE
 
     res.status(200).json({
       success: true,
@@ -138,7 +108,7 @@ app.post("/contact", async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.error("EMAIL ERROR:", error);
 
     res.status(500).json({
       success: false,
@@ -146,7 +116,6 @@ app.post("/contact", async (req, res) => {
     });
   }
 });
-
 
 // =============================
 // START SERVER
