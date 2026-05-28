@@ -30,7 +30,7 @@ app.use(
           "http://localhost:5173",
       "https://mywayhire.com",
       "https://www.mywayhire.com",
-      "wayhire-frontend-npop55sed-rajatsharmaw90-hashs-projects.vercel.app",
+      
     ],
   })
 );
